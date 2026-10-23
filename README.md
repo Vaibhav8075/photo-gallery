@@ -1,16 +1,39 @@
-# React + Vite
+# Photo Gallery
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A small React app that loads 30 photos from the [Picsum Photos API](https://picsum.photos/), shows them in a responsive grid, filters them by author as you type, and lets you mark favourites that survive a page refresh.
 
-Currently, two official plugins are available:
+Built with React 19, Vite and Tailwind CSS v4. No component libraries.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Run it locally
 
-## React Compiler
+```bash
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Then open the address Vite prints (usually http://localhost:5173).
 
-## Expanding the Oxlint configuration
+Other scripts: `npm run build` (production build into `dist/`), `npm run preview` (serve that build) and `npm run lint`.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## How it is organised
+
+```
+src/
+  App.jsx                   page shell
+  hooks/useFetchPhotos.js   fetches the photo list; returns { photos, loading, error }
+  state/favourites.js       favourites reducer + localStorage load/save helpers
+  components/
+    Gallery.jsx             uses the hook, holds search text and favourites, renders the grid
+    SearchBar.jsx           search input (memoised)
+    PhotoCard.jsx           photo, author name and heart button (memoised)
+    Spinner.jsx             loading state
+    ErrorMessage.jsx        error state
+```
+
+## Notes on the main pieces
+
+- **Fetching (`useFetchPhotos`)**: runs once on mount. `loading` starts as `true` and turns `false` when the request settles. A network failure or a non-2xx response sets `error`, which the gallery shows instead of the grid. The request is cancelled with an `AbortController` if the component unmounts first.
+- **Responsive grid**: `grid-cols-1 md:grid-cols-2 lg:grid-cols-4`, so 1 column on phones, 2 on tablets and 4 on desktops. Cards load a 600×400 version of each photo from Picsum rather than the full-size original.
+- **Search**: filters the photos already in memory by author name (case-insensitive). No extra request is made.
+- **Favourites (`useReducer`)**: the state is an array of photo ids and the reducer handles a `TOGGLE_FAVOURITE` action. The saved list is read through `useReducer`'s lazy initialiser, so it is ready on the first render, and an effect writes the list back to `localStorage` whenever it changes.
+- **`useCallback` / `useMemo`**: the search handler is wrapped in `useCallback` so `SearchBar` (wrapped in `memo`) receives the same function each render and does not re-render when only a favourite changes. The filtered list is computed in `useMemo`, so it is recalculated only when the photos or the search text change. The heart handler is also a `useCallback` (it only calls `dispatch`, which never changes), so a memoised `PhotoCard` re-renders only when its own favourite flag changes.
