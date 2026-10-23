@@ -31,7 +31,11 @@ function PhotoCard({ photo, isFavourite, onToggleFavourite }) {
           type="button"
           onClick={() => onToggleFavourite(photo.id)}
           aria-pressed={isFavourite}
-          aria-label={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
+          aria-label={
+            isFavourite
+              ? `Remove photo by ${photo.author} from favourites`
+              : `Add photo by ${photo.author} to favourites`
+          }
           className="shrink-0 rounded-full p-2 transition hover:bg-rose-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500 active:scale-90"
         >
           <HeartIcon filled={isFavourite} />
