@@ -1,13 +1,22 @@
-import { useCallback, useReducer } from 'react'
+import { useCallback, useEffect, useReducer } from 'react'
 import { useFetchPhotos } from '../hooks/useFetchPhotos'
-import { TOGGLE_FAVOURITE, favouritesReducer } from '../state/favourites'
+import {
+  TOGGLE_FAVOURITE,
+  favouritesReducer,
+  loadFavourites,
+  saveFavourites,
+} from '../state/favourites'
 import ErrorMessage from './ErrorMessage'
 import PhotoCard from './PhotoCard'
 import Spinner from './Spinner'
 
 function Gallery() {
   const { photos, loading, error } = useFetchPhotos()
-  const [favourites, dispatch] = useReducer(favouritesReducer, [])
+  const [favourites, dispatch] = useReducer(favouritesReducer, [], loadFavourites)
+
+  useEffect(() => {
+    saveFavourites(favourites)
+  }, [favourites])
 
   // dispatch never changes, so this function stays the same and unchanged cards can skip re-rendering.
   const handleToggleFavourite = useCallback((id) => {
