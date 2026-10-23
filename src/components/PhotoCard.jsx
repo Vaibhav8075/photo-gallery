@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 
 // Picsum resizes on request, so each card loads a small image instead of the multi-megabyte original.
 function thumbnailUrl(id) {
@@ -6,6 +6,9 @@ function thumbnailUrl(id) {
 }
 
 function PhotoCard({ photo, isFavourite, onToggleFavourite }) {
+  // The image stays transparent over the grey box until it has downloaded, then fades in.
+  const [imageLoaded, setImageLoaded] = useState(false)
+
   return (
     <article className="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
       <div className="aspect-[3/2] overflow-hidden bg-stone-200">
@@ -15,7 +18,8 @@ function PhotoCard({ photo, isFavourite, onToggleFavourite }) {
           width="600"
           height="400"
           loading="lazy"
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          onLoad={() => setImageLoaded(true)}
+          className={`h-full w-full object-cover transition duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
       </div>
 
