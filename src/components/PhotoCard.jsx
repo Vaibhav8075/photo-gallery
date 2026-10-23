@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 
 // Picsum resizes on request, so each card loads a small image instead of the multi-megabyte original.
 function thumbnailUrl(id) {
@@ -6,6 +6,9 @@ function thumbnailUrl(id) {
 }
 
 function PhotoCard({ photo, isFavourite, onToggleFavourite }) {
+  // The image stays transparent over the grey box until it has downloaded, then fades in.
+  const [imageLoaded, setImageLoaded] = useState(false)
+
   return (
     <article className="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
       <div className="aspect-[3/2] overflow-hidden bg-stone-200">
@@ -15,7 +18,8 @@ function PhotoCard({ photo, isFavourite, onToggleFavourite }) {
           width="600"
           height="400"
           loading="lazy"
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          onLoad={() => setImageLoaded(true)}
+          className={`h-full w-full object-cover transition duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
       </div>
 
@@ -27,7 +31,11 @@ function PhotoCard({ photo, isFavourite, onToggleFavourite }) {
           type="button"
           onClick={() => onToggleFavourite(photo.id)}
           aria-pressed={isFavourite}
-          aria-label={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
+          aria-label={
+            isFavourite
+              ? `Remove photo by ${photo.author} from favourites`
+              : `Add photo by ${photo.author} to favourites`
+          }
           className="shrink-0 rounded-full p-2 transition hover:bg-rose-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500 active:scale-90"
         >
           <HeartIcon filled={isFavourite} />
