@@ -4,6 +4,10 @@ A small React app that loads 30 photos from the [Picsum Photos API](https://pics
 
 Built with React 19, Vite and Tailwind CSS v4. No component libraries.
 
+![Photo Gallery on a desktop screen: four columns of photo cards, one marked as a favourite](docs/screenshot.jpg)
+
+<sub>Photos in the screenshot are served by Picsum Photos (sourced from Unsplash); the photographer is credited on each card.</sub>
+
 ## Run it locally
 
 ```bash
@@ -33,7 +37,7 @@ src/
 ## Notes on the main pieces
 
 - **Fetching (`useFetchPhotos`)**: runs once on mount. `loading` starts as `true` and turns `false` when the request settles. A network failure or a non-2xx response sets `error`, which the gallery shows instead of the grid. The request is cancelled with an `AbortController` if the component unmounts first.
-- **Responsive grid**: `grid-cols-1 md:grid-cols-2 lg:grid-cols-4`, so 1 column on phones, 2 on tablets and 4 on desktops. Cards load a 600×400 version of each photo from Picsum rather than the full-size original.
+- **Responsive grid**: `grid-cols-1 md:grid-cols-2 lg:grid-cols-4`, so 1 column on phones, 2 on tablets and 4 on desktops. Cards load a 600×400 version of each photo from Picsum rather than the full-size original, and each photo fades in once it has downloaded.
 - **Search**: filters the photos already in memory by author name (case-insensitive). No extra request is made.
 - **Favourites (`useReducer`)**: the state is an array of photo ids and the reducer handles a `TOGGLE_FAVOURITE` action. The saved list is read through `useReducer`'s lazy initialiser, so it is ready on the first render, and an effect writes the list back to `localStorage` whenever it changes.
 - **`useCallback` / `useMemo`**: the search handler is wrapped in `useCallback` so `SearchBar` (wrapped in `memo`) receives the same function each render and does not re-render when only a favourite changes. The filtered list is computed in `useMemo`, so it is recalculated only when the photos or the search text change. The heart handler is also a `useCallback` (it only calls `dispatch`, which never changes), so a memoised `PhotoCard` re-renders only when its own favourite flag changes.
